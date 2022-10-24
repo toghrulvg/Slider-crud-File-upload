@@ -93,5 +93,72 @@ namespace EntityFrameworkProject.Areas.AdminArea.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            try
+            {
+                if (id is null) return BadRequest();
+
+                Employee employee = await _context.Employees.FirstOrDefaultAsync(m => m.Id == id);
+
+                if (employee is null) return NotFound();
+
+                return View(employee);
+
+            }
+            catch (Exception ex)
+            {
+
+                ViewBag.Message = ex.Message;
+                return View();
+            }
+        }
+
+
+
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Employee employee)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(employee);
+                }
+
+                Employee dbEmployee = await _context.Employees.FirstOrDefaultAsync(m => m.Id == id);
+
+                if (dbEmployee is null) return NotFound();
+
+                if (dbEmployee.FullName.ToLower().Trim() == employee.FullName.ToLower().Trim())
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+
+                dbEmployee.FullName = employee.FullName;
+                dbEmployee.Age = employee.Age;
+                dbEmployee.Position = employee.Position;
+
+
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+
+            }
+            catch (Exception ex)
+            {
+
+                ViewBag.Message = ex.Message;
+                return View();
+            }
+        }
+
     }
 }
